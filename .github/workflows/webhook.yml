@@ -35,11 +35,6 @@ jobs:
           echo Add other actions to build,
           echo test, and deploy your project.
 
-      - name: Intentional failure (test)
-        run: |
-          echo "Forcing a failure to test Slack notification"
-          cat /etc/test.txt
-
 
       - name: Notify Slack (always)
         if: always()
@@ -57,10 +52,8 @@ jobs:
           fi
       
           STATUS_TEXT="Failed"
-          STATUS_ICON=":red_circle:"
           if [ "${{ job.status }}" = "success" ]; then
             STATUS_TEXT="Success"
-            STATUS_ICON=":large_green_circle:"
           fi
       
           jq -n \
@@ -69,12 +62,11 @@ jobs:
             --arg workflow "${{ github.workflow }}" \
             --arg branch "$BRANCH" \
             --arg status "$STATUS_TEXT" \
-            --arg icon "$STATUS_ICON" \
             --arg url "$RUN_URL" \
             '{
               mrkdwn: true,
               text:
-                ("*Status:* " + $status + " " + $icon + "\n"
+                ("*Status:* " + $status + "\n"
                 + "*Workflow:* " + $workflow + "\n"
                 + "*Repository:* " + $repo + "\n"
                 + "*Branch:* " + $branch + "\n"
