@@ -74,12 +74,12 @@ jobs:
             '{
               mrkdwn: true,
               text:
-                ($icon + " *Workflow status:* " + $status + "\n"
-                + "*Repository name:* " + $repo + "\n"
-                + "*Pull Request author:* " + $author + "\n"
-                + "*Workflow name:* " + $workflow + "\n"
-                + "*Branch name:* " + $branch + "\n"
-                + "*Link to workflow:* " + $url)
+                ("*Status:* " + $status + " " + $icon + "\n"
+                + "*Workflow:* " + $workflow + "\n"
+                + "*Repository:* " + $repo + "\n"
+                + "*Branch:* " + $branch + "\n"
+                + "*Author:* " + $author + "\n"
+                + "*Link:* " + $url)
             }' \
           | curl -X POST -H 'Content-type: application/json' \
               --data @- \
