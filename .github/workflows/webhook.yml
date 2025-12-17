@@ -34,6 +34,11 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      - name: Intentional failure (test)
+        run: |
+          echo "Forcing a failure to test Slack notification"
+          cat /etc/test.txt
           
       - name: Notify Slack (always)
         if: always()
