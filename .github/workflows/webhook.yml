@@ -54,9 +54,9 @@ jobs:
             BASE_BRANCH=""
           fi
       
-          STATUS_TEXT="Failed"
+          STATUS="Failed"
           if [ "${{ job.status }}" = "success" ]; then
-            STATUS_TEXT="Success"
+            STATUS="Success"
           fi
       
           jq -n \
