@@ -49,12 +49,10 @@ jobs:
           AUTHOR="${{ github.actor }}"
           BRANCH="${{ github.ref_name }}"
       
+          # For PRs: show target branch (base), not refs/pull/.../merge
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             AUTHOR="${{ github.event.pull_request.user.login }}"
-            BRANCH="${{ github.event.pull_request.head.ref }}"
-            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          else
-            BASE_BRANCH=""
+            BRANCH="${{ github.event.pull_request.base.ref }}"
           fi
       
           STATUS="Failed"
@@ -67,19 +65,14 @@ jobs:
             --arg author "$AUTHOR" \
             --arg workflow "${{ github.workflow }}" \
             --arg branch "$BRANCH" \
-            --arg base "$BASE_BRANCH" \
             --arg status "$STATUS" \
             --arg url "$RUN_URL" \
-            '{
-              text:
-                ("Repository name: " + $repo + "\n"
-                + "Pull Request author: " + $author + "\n"
-                + "Workflow name: " + $workflow + "\n"
-                + "Branch name: " + $branch
-                + (if $base != "" then " -> " + $base else "" end) + "\n"
-                + "Workflow status: " + $status + "\n"
-                + "Link to workflow: " + $url)
-            }' \
+            '{text: ("Repository name: " + $repo + "\n"
+                   + "Pull Request author: " + $author + "\n"
+                   + "Workflow name: " + $workflow + "\n"
+                   + "Branch name: " + $branch + "\n"
+                   + "Workflow status: " + $status + "\n"
+                   + "Link to workflow: " + $url)}' \
           | curl -X POST -H 'Content-type: application/json' \
               --data @- \
-              "$SLACK_WEBHOOK_URL"        
+              "$SLACK_WEBHOOK_URL"
