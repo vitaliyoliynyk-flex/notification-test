@@ -48,7 +48,10 @@ jobs:
       
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             AUTHOR="${{ github.event.pull_request.user.login }}"
-            BRANCH="${{ github.event.pull_request.base.ref }}"
+            BRANCH="${{ github.event.pull_request.head.ref }}"
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          else
+            BASE_BRANCH=""
           fi
       
           STATUS_TEXT="Failed"
@@ -61,7 +64,8 @@ jobs:
             --arg author "$AUTHOR" \
             --arg workflow "${{ github.workflow }}" \
             --arg branch "$BRANCH" \
-            --arg status "$STATUS_TEXT" \
+            --arg base "$BASE_BRANCH" \
+            --arg status "$STATUS" \
             --arg url "$RUN_URL" \
             '{
               mrkdwn: true,
@@ -69,7 +73,8 @@ jobs:
                 ("*Status:* " + $status + "\n"
                 + "*Workflow:* " + $workflow + "\n"
                 + "*Repository:* " + $repo + "\n"
-                + "*Branch:* " + $branch + "\n"
+                + "*Branch:* " + $branch
+                + (if $base != "" then " -> " + $base else "" end) + "\n"
                 + "*Author:* " + $author + "\n"
                 + "*Link:* " + $url)
             }' \
