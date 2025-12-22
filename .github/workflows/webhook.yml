@@ -34,7 +34,8 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-          
+
+
       - name: Notify Slack (always)
         if: always()
         env:
@@ -43,8 +44,14 @@ jobs:
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       
           AUTHOR="${{ github.actor }}"
+          BRANCH="${{ github.ref_name }}"
+      
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             AUTHOR="${{ github.event.pull_request.user.login }}"
+            BRANCH="${{ github.event.pull_request.head.ref }}"
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          else
+            BASE_BRANCH=""
           fi
       
           STATUS="Failed"
@@ -56,15 +63,21 @@ jobs:
             --arg repo "${{ github.repository }}" \
             --arg author "$AUTHOR" \
             --arg workflow "${{ github.workflow }}" \
-            --arg branch "${{ github.ref_name }}" \
+            --arg branch "$BRANCH" \
+            --arg base "$BASE_BRANCH" \
             --arg status "$STATUS" \
             --arg url "$RUN_URL" \
-            '{text: ("Repository name: " + $repo + "\n"
-                   + "Pull Request author: " + $author + "\n"
-                   + "Workflow name: " + $workflow + "\n"
-                   + "Branch name: " + $branch + "\n"
-                   + "Workflow status: " + $status + "\n"
-                   + "Link to workflow: " + $url)}' \
+            '{
+              mrkdwn: true,
+              text:
+                ("*Status:* " + $status + "\n"
+                + "*Workflow:* " + $workflow + "\n"
+                + "*Repository:* " + $repo + "\n"
+                + "*Branch:* " + $branch
+                + (if $base != "" then " -> " + $base else "" end) + "\n"
+                + "*Author:* " + $author + "\n"
+                + "*Link:* " + $url)
+            }' \
           | curl -X POST -H 'Content-type: application/json' \
               --data @- \
               "$SLACK_WEBHOOK_URL"
